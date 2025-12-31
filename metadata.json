@@ -1,0 +1,7 @@
+{
+  "name": "LifeOS",
+  "description": "A minimalist digital diary for clarity in every day.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
