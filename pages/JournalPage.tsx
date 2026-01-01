@@ -14,7 +14,8 @@ import {
   Calendar,
   Save,
   PenTool,
-  Check
+  Check,
+  Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { analyzeJournalEntry, transcribeAudio } from '../services/geminiService';
@@ -69,25 +70,7 @@ export const JournalPage: React.FC = () => {
     if (savedEntries) {
       setEntries(JSON.parse(savedEntries));
     } else {
-      // Mock Data
-      const initialData: JournalEntry[] = [
-        {
-          id: '1',
-          title: 'Morning Reflections',
-          content: 'Woke up feeling refreshed. The sun was hitting the window just right.',
-          date: '1st',
-          timestamp: 1767254400000, // Jan 1 2026
-          aiReflection: 'Cherish these quiet mornings.'
-        },
-        {
-          id: '2',
-          title: 'Project Kickoff',
-          content: 'Started the new design system today. It feels clean and organized.',
-          date: '3rd',
-          timestamp: 1767427200000, // Jan 3 2026
-        }
-      ];
-      setEntries(initialData);
+      setEntries([]);
     }
     
     if (savedReview) {
@@ -169,6 +152,14 @@ export const JournalPage: React.FC = () => {
       setEntries(prev => [...prev, newEntry]);
     }
     setIsModalOpen(false);
+  };
+
+  const handleDelete = (id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (confirm("Are you sure you want to delete this entry?")) {
+        setEntries(prev => prev.filter(entry => entry.id !== id));
+        if (currentId === id) setIsModalOpen(false);
+    }
   };
 
   // ... Audio Logic ... (same as before)
@@ -323,7 +314,14 @@ export const JournalPage: React.FC = () => {
                     <p className="text-sm text-neutral-500 dark:text-neutral-400 truncate pr-4 max-w-md">{entry.content}</p>
                   </div>
                 </div>
-                <div className="text-neutral-300 dark:text-neutral-600 group-hover:text-neutral-900 dark:group-hover:text-neutral-300 transition-colors">
+                <div className="text-neutral-300 dark:text-neutral-600 group-hover:text-neutral-900 dark:group-hover:text-neutral-300 transition-colors flex items-center gap-4">
+                  <button 
+                    onClick={(e) => handleDelete(entry.id, e)}
+                    className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-neutral-400 hover:text-red-500 rounded-full transition-colors"
+                    title="Delete Entry"
+                  >
+                    <Trash2 size={18} />
+                  </button>
                   <ChevronRight size={20} />
                 </div>
               </motion.div>
@@ -379,7 +377,17 @@ export const JournalPage: React.FC = () => {
               </div>
 
               {/* Editor Body */}
-              <div className="flex-1 overflow-y-auto p-6 md:p-8">
+              <div className="flex-1 overflow-y-auto p-6 md:p-8 relative">
+                 {/* Delete Button (Mobile/Desktop) */}
+                 {currentId && (
+                    <button 
+                        onClick={() => handleDelete(currentId)}
+                        className="absolute top-8 right-8 p-2 text-neutral-300 hover:text-red-500 transition-colors"
+                        title="Delete Entry"
+                    >
+                        <Trash2 size={20} />
+                    </button>
+                 )}
                  {/* Date Input */}
                  <input 
                     type="text" 
